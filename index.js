@@ -3,6 +3,7 @@ require('express-async-errors');
 
 const express = require('express');
 const app = express();
+const bodyParser = require('body-parser')
 
 // database
 const connectDB = require('./config/connectDB');
@@ -12,6 +13,7 @@ const authRoutes = require('./routes/authRoutes');
 
 // middlewares
 app.use(express.json())
+app.use(bodyParser.urlencoded({extended: false}))
 app.use('/api/v1/auth', authRoutes);
 
 

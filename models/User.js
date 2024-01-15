@@ -28,14 +28,16 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  verifiedAt: Date,
+  verified: Date,
   passwordToken: {
     type: String,
   },
   passwordTokenExpirationDate: {
     type: Date,
   },
-});
+},
+  { timestamps: true }
+);
 
 //encrypt passwords before save
 UserSchema.pre('save', async function () {
