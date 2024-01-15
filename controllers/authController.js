@@ -1,4 +1,5 @@
 
+const CustomError = require('../errors');
 
 // @ Register User
 // @ endpoint /api/v1/auth/register 
