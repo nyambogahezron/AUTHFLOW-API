@@ -85,7 +85,7 @@ const verifyEmail = asyncWrapper(async (req, res) => {
 // @ endpoint /api/v1/auth/login
 // @ method POST
 
-const login = async (req, res) => {
+const login = asyncWrapper(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -132,11 +132,22 @@ const login = async (req, res) => {
   attachCookiesToResponse({ res, user: tokenUser, refreshToken });
 
   res.status(StatusCodes.OK).json({ user: tokenUser });
-};
+});
 
-const logout = (req, res) => {
-  res.send("<h2>Register</h2>");
-};
+const logout = asyncWrapper(async (req, res) => {
+  const { userId } = req.body;
+  await Token.findOneAndDelete({ user: userId });
+
+  res.cookie("accessToken", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+  res.cookie("refreshToken", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+  res.status(StatusCodes.OK).json({ msg: "user logged out!" });
+});
 
 const resetPassword = (req, res) => {
   res.send("<h2>reset-password</h2>");
