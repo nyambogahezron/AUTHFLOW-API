@@ -3,6 +3,7 @@ const User = require("../models/User");
 const Token = require("../models/Token");
 const { StatusCodes } = require("http-status-codes");
 const asyncWrapper = require("../middleware/asyncHandler");
+const crypto = require("crypto");
 
 const {
   generateCode,
@@ -191,9 +192,37 @@ const forgotPassword = asyncWrapper(async (req, res) => {
 // @ Reset Password
 // @ endpoint /api/v1/auth/reset-password
 // @ method POST
-const resetPassword = (req, res) => {
-  res.send("<h2>reset-password</h2>");
-};
+const resetPassword = asyncWrapper(async (req, res) => {
+   const { token, email, password } = req.body;
+  if (!token || !email || !password) {
+    throw new CustomError.BadRequestError('Please provide all values');
+  }
+  const user = await User.findOne({ email });
+
+  if (user) {
+    const currentDate = new Date();
+
+    if (
+      user.passwordToken === createHash(token) &&
+      user.passwordTokenExpirationDate > currentDate
+    ) {
+      user.password = password;
+      user.passwordToken = null;
+      user.passwordTokenExpirationDate = null;
+      await user.save();
+    }
+    else {
+    throw new CustomError.BadRequestError("Something went wrong Please try again");
+
+    }
+  } else {
+    throw new CustomError.UnauthenticatedError("Invalid Credentials");
+  }
+
+   res
+    .status(StatusCodes.OK)
+    .json({ msg: "password reset Successful" });
+});
 module.exports = {
   register,
   login,
