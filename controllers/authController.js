@@ -51,7 +51,7 @@ const register = asyncWrapper(async (req, res) => {
 // @ endpoint /api/v1/auth/verify-email
 // @ method POST
 
-const verifyEmail = (req, res) => {
+const verifyEmail = asyncWrapper(async (req, res) => {
   const { verificationToken, email} = req.body;
 
   if (!verificationToken || !email) {
@@ -63,10 +63,19 @@ const verifyEmail = (req, res) => {
   if (!user) {
     throw new CustomError.UnauthenticatedError('Verification Failed');
   }
-    if (user.verificationToken !== verificationToken) {
+
+  if (user.verificationToken !== verificationToken) {
     throw new CustomError.UnauthenticatedError('Verification Failed');
   }
-};
+
+  (user.isVerified = true), (user.verified = Date.now());
+  user.verificationToken = '';
+
+  await user.save();
+
+  res.status(StatusCodes.OK).json({ msg: 'Email Verified' });
+  
+});
 
 const login = (req, res) => {
   res.send("<h2>login</h2>");
