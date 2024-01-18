@@ -4,6 +4,7 @@ require('express-async-errors');
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser');
 
 // database
 const connectDB = require('./config/connectDB');
@@ -18,6 +19,7 @@ const asyncHandlerMiddleware = require('./middleware/asyncHandler');
 
 
 app.use(express.json())
+app.use(cookieParser(process.env.JWT_SECRET));
 app.use(bodyParser.urlencoded({extended: false}))
 app.use('/api/v1/auth', authRoutes);
 
