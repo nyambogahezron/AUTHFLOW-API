@@ -2,14 +2,16 @@ const CustomError = require("../errors");
 const User = require("../models/User");
 const Token = require("../models/Token");
 const { StatusCodes } = require("http-status-codes");
-const crypto = require("crypto");
 const asyncWrapper = require("../middleware/asyncHandler");
 
 const {
+  generateCode,
   sendVerificationEmail,
+  sendResetPasswordEmail,
   generateToken,
   attachCookiesToResponse,
   createTokenUser,
+  createHash,
 } = require("../utils");
 
 // @ Register User
@@ -25,14 +27,7 @@ const register = asyncWrapper(async (req, res) => {
     throw new CustomError.BadRequestError("Email already exists !");
   }
 
-  // Generate Code
-  function generateSixDigitCode() {
-    const randomBytes = crypto.randomBytes(3);
-    const sixDigitCode = parseInt(randomBytes.toString("hex"), 16) % 1000000;
-    return sixDigitCode.toString().padStart(6, "0");
-  }
-
-  const verificationToken = generateSixDigitCode();
+  const verificationToken = generateCode();
 
   const user = await User.create({
     name,
@@ -134,6 +129,10 @@ const login = asyncWrapper(async (req, res) => {
   res.status(StatusCodes.OK).json({ user: tokenUser });
 });
 
+// @ Logout
+// @ endpoint /api/v1/auth/logout
+// @ method DELETE
+
 const logout = asyncWrapper(async (req, res) => {
   const { userId } = req.body;
   await Token.findOneAndDelete({ user: userId });
@@ -149,13 +148,52 @@ const logout = asyncWrapper(async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: "user logged out!" });
 });
 
+
+
+// @ Forgot Password
+// @ endpoint /api/v1/auth/forgot-password
+// @ method POST
+
+const forgotPassword = asyncWrapper(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    throw new CustomError.BadRequestError("Please provide valid email");
+  }
+
+  const user = await User.findOne({ email });
+
+  if (user) {
+    const passwordToken = generateCode();
+
+    // send email
+    await sendResetPasswordEmail({
+      name: user.name,
+      email: user.email,
+      token: passwordToken,
+    });
+
+    const tenMinutes = 1000 * 60 * 10;
+    const passwordTokenExpirationDate = new Date(Date.now() + tenMinutes);
+
+    user.passwordToken = createHash(passwordToken);
+    user.passwordTokenExpirationDate = passwordTokenExpirationDate;
+    await user.save();
+  } else {
+    throw new CustomError.UnauthenticatedError("Invalid Credentials");
+  }
+
+  res
+    .status(StatusCodes.OK)
+    .json({ msg: "Please check your email for reset password code" });
+});
+
+// @ Reset Password
+// @ endpoint /api/v1/auth/reset-password
+// @ method POST
 const resetPassword = (req, res) => {
   res.send("<h2>reset-password</h2>");
 };
-const forgotPassword = (req, res) => {
-  res.send("<h2>forgot-password</h2>");
-};
-
 module.exports = {
   register,
   login,
