@@ -1,7 +1,7 @@
 {
   "name": "auth_flow_api",
   "version": "1.0.0",
-  "description": "auth api with email verfication",
+  "description": "auth api with email Verification",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",

@@ -1,3 +1,3 @@
-const sendVerficationEmail= require('./sendEmail');
+const sendVerificationEmail = require('./sendEmail');
 
-module.exports = { sendVerficationEmail };
+module.exports = { sendVerificationEmail };

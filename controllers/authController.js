@@ -3,14 +3,15 @@ const User = require("../models/User");
 const Token = require("../models/Token");
 const { StatusCodes } = require("http-status-codes");
 const crypto = require("crypto");
+const asyncWrapper = require("../middleware/asyncHandler");
 
-const { sendVerficationEmail } = require("../utils");
+const { sendVerificationEmail: sendVerificationEmail } = require("../utils");
 
 // @ Register User
 // @ endpoint /api/v1/auth/register
 // @ method POST
 
-const register = async (req, res) => {
+const register = asyncWrapper(async (req, res) => {
   const { email, name, password } = req.body;
 
   //check if email already exists
@@ -35,15 +36,36 @@ const register = async (req, res) => {
     verificationToken,
   });
 
-  await sendVerficationEmail({
+  await sendVerificationEmail({
     name: user.name,
     email: user.email,
     verificationToken: user.verificationToken,
   });
 
   res.status(StatusCodes.CREATED).json({
-    msg: "User Created Success, Please check Email to verfiy",
+    msg: "User Created Success, Please check Email to verify",
   });
+});
+
+// @ Verify Email
+// @ endpoint /api/v1/auth/verify-email
+// @ method POST
+
+const verifyEmail = (req, res) => {
+  const { verificationToken, email} = req.body;
+
+  if (!verificationToken || !email) {
+    throw new CustomError.BadRequestError("Provide all fields");
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new CustomError.UnauthenticatedError('Verification Failed');
+  }
+    if (user.verificationToken !== verificationToken) {
+    throw new CustomError.UnauthenticatedError('Verification Failed');
+  }
 };
 
 const login = (req, res) => {
@@ -52,10 +74,6 @@ const login = (req, res) => {
 
 const logout = (req, res) => {
   res.send("<h2>Register</h2>");
-};
-
-const verifyEmail = (req, res) => {
-  res.send("<h2>verify-email</h2>");
 };
 
 const resetPassword = (req, res) => {
