@@ -5,12 +5,15 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
+
 
 // database
 const connectDB = require('./config/connectDB');
 
 //routers
 const authRoutes = require('./routes/authRoutes');
+const userRouter = require('./routes/userRoutes');
 
 // middlewares
 const notFoundMiddleware = require('./middleware/notFound');
@@ -21,7 +24,10 @@ const asyncHandlerMiddleware = require('./middleware/asyncHandler');
 app.use(express.json())
 app.use(cookieParser(process.env.JWT_SECRET));
 app.use(bodyParser.urlencoded({extended: false}))
+app.use(cors());
+
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', userRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
