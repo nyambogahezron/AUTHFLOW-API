@@ -24,9 +24,9 @@ const asyncHandlerMiddleware = require('./middleware/asyncHandler');
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.JWT_SECRET));
-app.use(bodyParser.urlencoded({extended: false}))
+
 const corsOptions = {
-  origin: 'https://authflow-app-rho.vercel.app/',
+  origin: 'https://authflow-app-rho.vercel.app',
   optionsSuccessStatus: 200, 
 };
 app.use(cors());
