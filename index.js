@@ -20,12 +20,15 @@ const notFoundMiddleware = require('./middleware/notFound');
 const errorHandlerMiddleware = require('./middleware/errorHandler');
 const asyncHandlerMiddleware = require('./middleware/asyncHandler');
 
+app.use(cors({
+  origin: ['https://auth-flow-app-0dsk.onrender.com', 'https://authflow-app-rho.vercel.app/login'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+}));
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({extended: false}))
-
-app.use(cors());
 
 app.use(cookieParser(process.env.JWT_SECRET));
 
