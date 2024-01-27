@@ -46,11 +46,12 @@ const updateUser = asyncWrapper(async (req, res) => {
 
   const tokenUser = createTokenUser(user);
   attachCookiesToResponse({ res, user: tokenUser });
-  res.status(StatusCodes.OK).json({ user: tokenUser });
+
+  res.status(StatusCodes.OK).json({msg: "Profile Updated Successful", user: tokenUser });
 });
 
 // @ Update user
-// @ endpoint /api/users//updateUserPassword
+// @ endpoint /api/users/updateUserPassword
 // @ method PATCH
 
 const updateUserPassword = asyncWrapper(async (req, res) => {

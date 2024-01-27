@@ -24,8 +24,9 @@ const register = asyncWrapper(async (req, res) => {
 
   //check if email already exists
   const emailAlreadyExists = await User.findOne({ email });
+
   if (emailAlreadyExists) {
-    throw new CustomError.BadRequestError("Email already exists !");
+      throw new CustomError.BadRequestError("Email already exists !");
   }
 
   const verificationToken = generateCode();
@@ -42,9 +43,11 @@ const register = asyncWrapper(async (req, res) => {
     email: user.email,
     verificationToken: user.verificationToken,
   });
+  user.password = null;
 
   res.status(StatusCodes.CREATED).json({
     msg: "User Created Success, Please check Email to verify",
+    user: user,
   });
 });
 
@@ -73,8 +76,9 @@ const verifyEmail = asyncWrapper(async (req, res) => {
   user.verificationToken = "";
 
   await user.save();
+  user.password = undefined;
 
-  res.status(StatusCodes.OK).json({ msg: "Email Verified" });
+  res.status(StatusCodes.OK).json({ msg: "Email Verified Successful", user: user });
 });
 
 // @ Login
@@ -146,7 +150,7 @@ const logout = asyncWrapper(async (req, res) => {
     httpOnly: true,
     expires: new Date(Date.now()),
   });
-  res.status(StatusCodes.OK).json({ msg: "user logged out!" });
+  res.status(StatusCodes.OK).json({ msg: "user logged out!", user: userId });
 });
 
 
