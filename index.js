@@ -22,26 +22,18 @@ const asyncHandlerMiddleware = require('./middleware/asyncHandler');
 
 
 app.use(express.json())
-app.use(cors())
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({extended: false}))
 
 app.use(cookieParser(process.env.JWT_SECRET));
 
-//Serve frontend files
+const corsOptions = {
+  origin: 'https://authflow-app-rho.vercel.app',
+  optionsSuccessStatus: 200,
+};
 
-if (process.env.NODE_ENV === 'production') {
-  const __dirname = path.resolve();
-  app.use(express.static(path.join(__dirname, '/frontend/dist')));
+app.use(cors(corsOptions));
 
-  app.get('*', (req, res) =>
-    res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html'))
-  );
-} else {
-  app.get('/', (req, res) => {
-    res.send('API is running....');
-  });
-}
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRouter);
